@@ -1,0 +1,156 @@
+{
+    "en": {
+        "about": [
+            "Made by [@IOCoinNetwork](https://t.me/IOCoinNetwork) community.",
+            "This is a tipbot for I/O Coin."
+        ],
+        "about_public": [
+            "Please, click the button bellow:",
+            "You can't ask this in public !"
+        ],
+        "button_about": [
+            ":information: ABOUT"
+        ],
+        "button_help": [
+            ":robot_face: HELP"
+        ],
+        "button_help_advanced_caption": [
+            ":gear: Advanced help."
+        ],
+        "button_help_advanced_url": [
+            "https://github.com/DarthJahus/PandaTip-Telegram/wiki/Usage-and-tricks-%5BEnglish%5D"
+        ],
+        "callback_simple": [
+            "Here you are!"
+        ],
+        "clear_log_done": [
+            ":white_check_mark: Cleared!"
+        ],
+        "error_bad_deep_link": [
+            "Error. Bad deep link."
+        ],
+            "error_making_rpc_call": [
+            "Error. The server looks down :sob:, ask on [@IOCoinNetwork](https://t.me/IOCoinNetwork)"
+        ],
+        "error_insufficient_funds": [
+            "Error. Insufficient funds."
+        ],
+        "global_paused": [
+            ":pause_button: Sorry, this bot has been paused by the admins. Try again later."
+        ],
+        "help": [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ":cloud_with_rain: You may share with all the active members of a group!",
+            ":globe_with_meridians: Need to withdraw to your wallet?",
+            ":moneybag: To get started, create a deposit address or ask a friend to send you some IOC.",
+            ":person_tipping_hand: Once you have some IOC, share them with your friends.",
+            "Click the button bellow:",
+            "Important: `amount` will be sent to each member, and it will NOT be shared among them.",
+            "Make sure to correctly tag your the person you are tipping.",
+            "Make sure to rain more than the minimum amount, and on enough members.",
+            "Need more advanced help and usage tricks?",
+            "Please double check your address before submitting, as we cannot undo that process.",
+            "Then you can send funds to that address the same way as you usually transfer funds with your wallet.",
+            "This bot allows you to receive, store and send I/O coins on Telegram.",
+            "Use /balance _in private_ to know how much I/O Coin you have got in your account.",
+            "Use /deposit or /address _in private_ to know your own address on the bot.",
+            "Use `/rain <amount> [count]`",
+            "Use `/tip <user> <amount>`",
+            "Use `/withdraw <address> <amount>`"
+        ],
+        "help_public": [
+            "Please, click the button bellow:",
+            "You can't ask this in public!"
+        ],
+        "pause_answer_paused": [
+            ":pause_button: Paused!"
+        ],
+        "pause_answer_resumed": [
+            ":play_button: Resumed!"
+        ],
+        "rain_missing_recipient": [
+            "Some users couldn't be rained upon. Reasons..."
+        ],
+        "rain_preposition": [
+            "on"
+        ],
+        "rain_queue_min_amount": [
+            "Can't rain less than `%i %s` per member (demanded: `%i %s`)."
+        ],
+        "rain_queue_min_max_members": [
+            "Can't rain on less than `%i` or more than `%i%` members (demanded: `%i`)."
+        ],
+        "rain_queue_not_enough_members": [
+            "Active: `%i (+%i)`",
+            "It can't rain for now as there aren't enough active users.",
+            "Required: `%i`"
+        ],
+        "rain_queue_not_initialized": [
+            "It can't rain for now as queue is empty.",
+            "Please try again when more people have been active."
+        ],
+        "rain_success": [
+            "successfully rained:"
+        ],
+        "scavenge_empty": [
+            "Nothing to scavenge. Your previous account is empty"
+        ],
+        "scavenge_no_address": [
+            "Sorry, no account was found for your UserID"
+        ],
+        "scavenge_success_1": [
+            "Successfully scavenged your previous account"
+        ],
+        "scavenge_success_2": [
+            "You have received:"
+        ],
+        "tip_error_arguments": [
+            "- Amounts should be *numbers* (not real IOC);",
+            "- Provide *an amount per recipient* or *one unique* for all of them.",
+            "- Recipients should be *unique* and *properly tagged*;",
+            "There was an error in your tip."
+        ],
+        "tip_missing_recipient": [
+            "Some users couldn't be tipped. Reasons..."
+        ],
+        "tip_no_funds": [
+            "Sorry, you don't have enough funds for this operation.",
+            "You need:"
+        ],
+        "tip_preposition": [
+            "to"
+        ],
+        "tip_success": [
+            "successfully tipped:"
+        ],
+        "user_address": [
+            "Your deposit address is:"
+        ],
+        "user_balance": [
+            "Your balance is:"
+        ],
+        "user_no_address": [
+            "If you want to create an account, please press the button bellow:",
+            "You seem to be a new user."
+        ],
+        "user_no_address_button": [
+            "My account :panda_face:"
+        ],
+        "welcome": [
+            ":panda_face: Hi! This is a tipbot for I/O Coin.",
+            "You can use it to share IOC with your friends."
+        ],
+        "withdraw_no_funds": [
+            "Available for withdrawal:",
+            "Sorry, you don't have enough funds for this operation."
+        ],
+        "withdraw_success": [
+            "Withdrawal made successfully."
+        ]
+    }
+}
