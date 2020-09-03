@@ -22,6 +22,9 @@ Create a `config.json` **JSON** file and set up the following parameters:
     	"rpc-uri": "http://127.0.0.1:33765",
     	"rpc-user": "your-user",
     	"rpc-psw": "your-password",
+    	"rpc-uri-test": "http://127.0.0.1:43765",
+    	"rpc-user-test": "your-testnet-user",
+    	"rpc-psw-test": "your-testnet-password",
     	"admins": [-0, 0],
     	"spam_filter": [5, 60],
     	"rain": {

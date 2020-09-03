@@ -122,6 +122,9 @@
             "Sorry, you don't have enough funds for this operation.",
             "You need:"
         ],
+        "tip_no_receiver": [
+            "Recipients should be different than you."
+        ],
         "tip_preposition": [
             "to"
         ],

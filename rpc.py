@@ -52,7 +52,7 @@ class CoinRPC(object):
                 headers={"content-type": "text/plain", "connection": "close"}
             )
             if req.status_code != 200:
-                return {"success": False, "message": req.status_code}
+                return {"success": False, "message": "%s=%s" % (str(req.status_code), str(req.json()))}
             else:
                 return {"success": True, "result": req.json()}
         except requests.exceptions.ConnectionError:
@@ -72,9 +72,12 @@ class CoinRPC(object):
             return {"success": False, "message": _message}
 
 
-def main():
+def main(test=False):
     _config = load_file_json("config.json")
-    coin = Wrapper(CoinRPC(_config["rpc-uri"], (_config["rpc-user"], _config["rpc-psw"])))
+    if test:
+        coin = Wrapper(CoinRPC(_config["rpc-uri-test"], (_config["rpc-user-test"], _config["rpc-psw-test"])))
+    else:
+        coin = Wrapper(CoinRPC(_config["rpc-uri"], (_config["rpc-user"], _config["rpc-psw"])))
     # getaccountaddress creates an address if account doesn't exist
     res = coin.getaddressesbyaccount("tmp")
     if not res["success"]:
@@ -96,4 +99,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    testnet = True
+    main(testnet)

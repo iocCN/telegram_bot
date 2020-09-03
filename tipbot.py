@@ -21,13 +21,17 @@ config = load_file_json("config.json")
 _lang = "en"  # ToDo: Per-user language
 strings = Strings("strings.json")
 _paused = False
+_testnet = True
 _spam_filter = AntiSpamFilter(config["spam_filter"][0], config["spam_filter"][1])
 _rain_queues = {
     "-1": [("0", "@username", "Name")]
 }
 
 # Constants
-__wallet_rpc = RPCWrapper(CoinRPC(config["rpc-uri"], (config["rpc-user"], config["rpc-psw"])))
+if _testnet:
+    __wallet_rpc = RPCWrapper(CoinRPC(config["rpc-uri-test"], (config["rpc-user-test"], config["rpc-psw-test"])))
+else:
+    __wallet_rpc = RPCWrapper(CoinRPC(config["rpc-uri"], (config["rpc-user"], config["rpc-psw"])))
 __rain_queue_filter = filters.Filters.group & (
         filters.Filters.text | filters.Filters.photo | filters.Filters.video | filters.Filters.reply | filters.Filters.forwarded
 )
@@ -62,7 +66,7 @@ def check_minimum(text):
         raise ValueError("Can't convert %s to float." % text)
 
 
-def chat_type(update):
+def chat_type(update: Updater):
     if update.effective_chat is None:
         return "private"
     elif update.effective_chat.type == "private":
@@ -71,16 +75,16 @@ def chat_type(update):
         return "group"
 
 
-def can_use(update):
+def can_use(update: Updater):
     if _paused:
         update.message.reply_text(text=emoji.emojize(strings.get("global_paused"), use_aliases=True), quote=True)
         return False
-    if not _spam_filter.verify(str(update.effective_user.id)):
-        return False
+    #if not _spam_filter.verify(str(update.effective_user.id)):
+    #    return False
     return True
 
 
-def do_rpc_getbalance_account(update, _user_id, _address, method="undefined"):
+def do_rpc_getbalance_account(update: Updater, _user_id, _address, method="undefined"):
     if __rpc_getbalance_account:
         _rpc_call = __wallet_rpc.getbalance(_user_id, __minconf)
     else:
@@ -95,7 +99,7 @@ def do_rpc_getbalance_account(update, _user_id, _address, method="undefined"):
     return False
 
 
-def do_rpc_getaddressesbyaccount(update, _user_id, method="undefined", force=False, ask=True):
+def do_rpc_getaddressesbyaccount(update: Updater, _user_id, method="undefined", force=False, ask=True):
     _rpc_call = __wallet_rpc.getaddressesbyaccount(_user_id)
     if not _rpc_call["success"]:
         log(method, _user_id, "getaddressesbyaccount > Error during RPC call: %s" % _rpc_call["message"])
@@ -126,7 +130,7 @@ def do_rpc_getaddressesbyaccount(update, _user_id, method="undefined", force=Fal
     return False
 
 
-def do_rpc_sendmany(update, _user_id, _tip_dict, method="undefined"):
+def do_rpc_sendmany(update: Updater, _user_id, _tip_dict, method="undefined"):
     _rpc_call = __wallet_rpc.sendmany(_user_id, _tip_dict)
     if not _rpc_call["success"]:
         log(method, _user_id, "sendmany > Error during RPC call: %s" % _rpc_call["message"])
@@ -138,7 +142,7 @@ def do_rpc_sendmany(update, _user_id, _tip_dict, method="undefined"):
     return False
 
 
-def do_rpc_sendfrom(update, _user_id, _recipient, _amount, method="undefined"):
+def do_rpc_sendfrom(update: Updater, _user_id, _recipient, _amount, method="undefined"):
     _rpc_call = __wallet_rpc.sendfrom(_user_id, _recipient, _amount)
     if not _rpc_call["success"]:
         log(method, _user_id, "sendfrom > Error during RPC call: %s" % _rpc_call["message"])
@@ -165,14 +169,13 @@ def cmd_start(update: Updater, context: CallbackContext):
         if not _spam_filter.verify(str(update.effective_user.id)):
             return
         # Check for deep link
-        print(context.args)
         if len(context.args) > 0:
             if context.args[0].lower() == "about":
                 cmd_about()
             elif context.args[0].lower() == "help":
-                cmd_help(context.bot, update)
+                cmd_help(update, context)
             elif context.args[0].lower() == "address":
-                deposit(context.bot, update)
+                deposit(update, context)
             else:
                 update.message.reply_text(
                     strings.get("error_bad_deep_link", _lang),
@@ -370,7 +373,7 @@ def tip(update: Updater, context: CallbackContext):
     /tip u1 u2 u3 ... v1 v2 v3 ...
     /tip u1 v1 u2 v2 u3 v3 ...
     """
-    if not can_use(update) or not len(context.args) < 2:
+    if not can_use(update) or len(context.args) < 2:
         return  # To avoid the long annoying error message that's shown when users misuse the command
     # Get recipients and values
     _message = update.effective_message.text
@@ -387,15 +390,14 @@ def tip(update: Updater, context: CallbackContext):
         elif entity.type == "mention":
             # _username starts with @
             # _username is unique
-            _username = update.effective_message.text[entity.offset:(entity.offset + entity.length)].lower()
+            _username = update.message.parse_entity(entity).lower()
+            #_username = update.effective_message.text[entity.offset:(entity.offset + entity.length)].lower()
             if _username not in _handled:
                 _handled[_username] = (_username, entity.offset, entity.length)
                 _recipients.append(_username)
         _part = _message[:entity.offset - _modifier]
         _message = _message[:entity.offset - _modifier] + _message[entity.offset + entity.length - _modifier:]
         _modifier = entity.offset + entity.length - len(_part)
-    print("_handled = %s" % _handled)
-    print("_recipients = %s" % _recipients)
     _amounts = _message.split()
     # check if amounts are all convertible to float
     _amounts_float = []
@@ -415,7 +417,7 @@ def tip(update: Updater, context: CallbackContext):
             parse_mode=ParseMode.MARKDOWN
         )
     else:
-        do_tip(_amounts_float, _recipients, _handled)
+        do_tip(update, context, _amounts_float, _recipients, _handled)
 
 
 def do_tip(update: Updater, context: CallbackContext, amounts_float, recipients, handled, verb="tip"):
@@ -478,11 +480,11 @@ def do_tip(update: Updater, context: CallbackContext, amounts_float, recipients,
                     else:
                         _recipient_id = _recipient
                     # Check if recipient has an address (required for .sendmany())
-                    _addresses = do_rpc_getaddressesbyaccount(update, _recipient_id, "do_tip:%s" % _user_id, True)
+                    _addresses = do_rpc_getaddressesbyaccount(update, _recipient_id, "do_tip:%s" % _recipient, True)
                     if _addresses[0] is not None:
                         # Because recipient has an address, we can add him to the dict
                         _tip_dict_accounts[_recipient_id] = _amounts_float[i]
-                        _tip_dict_addresses[_address] = _amounts_float[i]
+                        _tip_dict_addresses[_addresses[0]] = _amounts_float[i]
                     i += 1
                 #
                 _tip_dict = {}
@@ -492,28 +494,33 @@ def do_tip(update: Updater, context: CallbackContext, amounts_float, recipients,
                     _tip_dict = _tip_dict_addresses
                 # Check if there are users left to tip
                 if len(_tip_dict) == 0:
-                    return
-                _tx = do_rpc_sendmany(update, _user_id, _tip_dict, "do_tip")
-                if _tx:
-                    _suppl = ""
-                    if len(_tip_dict) != len(recipients):
-                        _suppl = "\n\n_%s_" % strings.get("%s_missing_recipient" % verb, _lang)
                     update.message.reply_text(
-                        text="*%s* %s\n%s\n\n[tx %s](%s)%s" % (
-                            update.effective_user.name,
-                            strings.get("%s_success" % verb, _lang),
-                            ''.join((("\n- `%3.0f %s ` %s *%s*" % (
-                                _tip_dict_accounts[_recipient_id], __unit,
-                                strings.get("%s_preposition" % verb, _lang),
-                                handled[_recipient_id][0])) for _recipient_id in _tip_dict_accounts)),
-                            _tx[:4] + "..." + _tx[-4:],
-                            __blockchain_explorer_tx + _tx,
-                            _suppl
-                        ),
+                        text="%s" % (strings.get("tip_no_receiver", _lang)),
                         quote=True,
-                        parse_mode=ParseMode.MARKDOWN,
-                        disable_web_page_preview=True
+                        parse_mode=ParseMode.MARKDOWN
                     )
+                else:
+                    _tx = do_rpc_sendmany(update, _user_id, _tip_dict, "do_tip")
+                    if _tx:
+                        _suppl = ""
+                        if len(_tip_dict) != len(recipients):
+                            _suppl = "\n\n_%s_" % strings.get("%s_missing_recipient" % verb, _lang)
+                        update.message.reply_text(
+                            text="*%s* %s\n%s\n\n[tx %s](%s)%s" % (
+                                update.effective_user.name,
+                                strings.get("%s_success" % verb, _lang),
+                                ''.join((("\n- `%3.0f %s ` %s *%s*" % (
+                                    _tip_dict_accounts[_recipient_id], __unit,
+                                    strings.get("%s_preposition" % verb, _lang),
+                                    handled[_recipient_id][0])) for _recipient_id in _tip_dict_accounts)),
+                                _tx[:4] + "..." + _tx[-4:],
+                                __blockchain_explorer_tx + _tx,
+                                _suppl
+                            ),
+                            quote=True,
+                            parse_mode=ParseMode.MARKDOWN,
+                            disable_web_page_preview=True
+                        )
 
 
 def damp_rock(update: Updater, context: CallbackContext):
