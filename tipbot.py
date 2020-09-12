@@ -35,11 +35,11 @@ else:
 __rain_queue_filter = filters.Filters.group & (
         filters.Filters.text | filters.Filters.photo | filters.Filters.video | filters.Filters.reply | filters.Filters.forwarded
 )
-__rain_queue_min_text_length = config["rain"]["rain_queue_min_text_length"]  # 10
-__rain_queue_min_words = config["rain"]["rain_queue_min_words"]  # 2
-__rain_queue_max_members = config["rain"]["rain_queue_max_members"]  # Max members in a queue, 30
-__rain_min_members = config["rain"]["rain_min_members"]  # 5
-__rain_min_amount = config["rain"]["rain_min_amount"]  # 10
+__rain_queue_min_text_length = config["rain"]["rain_queue_min_text_length"]
+__rain_queue_min_words = config["rain"]["rain_queue_min_words"]
+__rain_queue_max_members = config["rain"]["rain_queue_max_members"]
+__rain_min_members = config["rain"]["rain_min_members"]
+__rain_min_amount = config["rain"]["rain_min_amount"]
 
 __unit = "IOC"
 
@@ -66,7 +66,7 @@ def check_minimum(text):
         raise ValueError("Can't convert %s to float." % text)
 
 
-def chat_type(update: Updater):
+def chat_type(update):
     if update.effective_chat is None:
         return "private"
     elif update.effective_chat.type == "private":
@@ -75,7 +75,7 @@ def chat_type(update: Updater):
         return "group"
 
 
-def can_use(update: Updater):
+def can_use(update):
     if _paused:
         update.message.reply_text(text=emoji.emojize(strings.get("global_paused"), use_aliases=True), quote=True)
         return False
@@ -84,7 +84,7 @@ def can_use(update: Updater):
     return True
 
 
-def do_rpc_getbalance_account(update: Updater, _user_id, _address, method="undefined"):
+def do_rpc_getbalance_account(update, _user_id, _address, method="undefined"):
     if __rpc_getbalance_account:
         _rpc_call = __wallet_rpc.getbalance(_user_id, __minconf)
     else:
@@ -99,7 +99,7 @@ def do_rpc_getbalance_account(update: Updater, _user_id, _address, method="undef
     return False
 
 
-def do_rpc_getaddressesbyaccount(update: Updater, _user_id, method="undefined", force=False, ask=True):
+def do_rpc_getaddressesbyaccount(update, _user_id, method="undefined", force=False, ask=True):
     _rpc_call = __wallet_rpc.getaddressesbyaccount(_user_id)
     if not _rpc_call["success"]:
         log(method, _user_id, "getaddressesbyaccount > Error during RPC call: %s" % _rpc_call["message"])
@@ -130,7 +130,7 @@ def do_rpc_getaddressesbyaccount(update: Updater, _user_id, method="undefined", 
     return False
 
 
-def do_rpc_sendmany(update: Updater, _user_id, _tip_dict, method="undefined"):
+def do_rpc_sendmany(update, _user_id, _tip_dict, method="undefined"):
     _rpc_call = __wallet_rpc.sendmany(_user_id, _tip_dict)
     if not _rpc_call["success"]:
         log(method, _user_id, "sendmany > Error during RPC call: %s" % _rpc_call["message"])
@@ -142,7 +142,7 @@ def do_rpc_sendmany(update: Updater, _user_id, _tip_dict, method="undefined"):
     return False
 
 
-def do_rpc_sendfrom(update: Updater, _user_id, _recipient, _amount, method="undefined"):
+def do_rpc_sendfrom(update, _user_id, _recipient, _amount, method="undefined"):
     _rpc_call = __wallet_rpc.sendfrom(_user_id, _recipient, _amount)
     if not _rpc_call["success"]:
         log(method, _user_id, "sendfrom > Error during RPC call: %s" % _rpc_call["message"])
@@ -154,7 +154,7 @@ def do_rpc_sendfrom(update: Updater, _user_id, _recipient, _amount, method="unde
     return False
 
 
-def bad_rpc_connection(update: Updater):
+def bad_rpc_connection(update):
     update.message.reply_text(
         emoji.emojize(strings.get("error_making_rpc_call", _lang), use_aliases=True),
         quote=True,
@@ -163,7 +163,7 @@ def bad_rpc_connection(update: Updater):
     )
 
 
-def cmd_start(update: Updater, context: CallbackContext):
+def cmd_start(update, context):
     """Reacts when /start is sent to the bot."""
     if update.effective_chat.type == "private":
         if not _spam_filter.verify(str(update.effective_user.id)):
@@ -175,7 +175,7 @@ def cmd_start(update: Updater, context: CallbackContext):
             elif context.args[0].lower() == "help":
                 cmd_help(update, context)
             elif context.args[0].lower() == "address":
-                deposit(update, context)
+                deposit(update)
             else:
                 update.message.reply_text(
                     strings.get("error_bad_deep_link", _lang),
@@ -206,7 +206,7 @@ def cmd_start(update: Updater, context: CallbackContext):
             )
 
 
-def cmd_about(update: Updater, context: CallbackContext):
+def cmd_about(update, context):
     if not _spam_filter.verify(str(update.effective_user.id)):
         return
     if update.effective_chat is None:
@@ -223,7 +223,6 @@ def cmd_about(update: Updater, context: CallbackContext):
                 update.callback_query.answer(strings.get("callback_simple", _lang))
         except:
             pass
-        # Answer
         _button = InlineKeyboardButton(
             text=emoji.emojize(strings.get("button_help", _lang), use_aliases=True),
             callback_data="help"
@@ -239,7 +238,6 @@ def cmd_about(update: Updater, context: CallbackContext):
             reply_markup=_markup
         )
     else:
-        # Done: Button (2018-07-18)
         _button = InlineKeyboardButton(
             text=emoji.emojize(strings.get("button_about", _lang), use_aliases=True),
             url="https://telegram.me/%s?start=about" % context.bot.username
@@ -256,7 +254,7 @@ def cmd_about(update: Updater, context: CallbackContext):
     return True
 
 
-def cmd_help(update: Updater, context: CallbackContext):
+def cmd_help(update, context):
     if not _spam_filter.verify(str(update.effective_user.id)):
         return
     if update.effective_chat is None:
@@ -273,7 +271,6 @@ def cmd_help(update: Updater, context: CallbackContext):
                 update.callback_query.answer(strings.get("callback_simple", _lang))
         except:
             pass
-        # Answer
         _button = InlineKeyboardButton(
             text=emoji.emojize(strings.get("button_help_advanced_caption", _lang), use_aliases=True),
             url=strings.get("button_help_advanced_url", _lang)
@@ -289,7 +286,6 @@ def cmd_help(update: Updater, context: CallbackContext):
             disable_web_page_preview=True
         )
     else:
-        # Done: Button (2018-07-18)
         _button = InlineKeyboardButton(
             text=emoji.emojize(strings.get("button_help", _lang), use_aliases=True),
             url="https://telegram.me/%s?start=help" % context.bot.username
@@ -306,7 +302,7 @@ def cmd_help(update: Updater, context: CallbackContext):
     return True
 
 
-def msg_no_account(update: Updater):
+def msg_no_account(update):
     _button = InlineKeyboardButton(
         text=emoji.emojize(strings.get("user_no_address_button", _lang), use_aliases=True),
         url="https://telegram.me/%s?start=address" % config["telegram-botusername"]
@@ -322,7 +318,7 @@ def msg_no_account(update: Updater):
     )
 
 
-def deposit(update: Updater, context: CallbackContext):
+def deposit(update, context):
     """
     This commands works only in private.
     If the user has no address, a new account is created with his Telegram user ID (str)
@@ -345,7 +341,7 @@ def deposit(update: Updater, context: CallbackContext):
                 )
 
 
-def balance(update: Updater, context: CallbackContext):
+def balance(update, context):
     if can_use(update) and chat_type(update) == "private":
         _username = update.effective_user.username
         if _username is None:
@@ -367,7 +363,7 @@ def balance(update: Updater, context: CallbackContext):
                 )
 
 
-def tip(update: Updater, context: CallbackContext):
+def tip(update, context):
     """
     /tip <user> <amount>
     /tip u1 u2 u3 ... v1 v2 v3 ...
@@ -420,7 +416,7 @@ def tip(update: Updater, context: CallbackContext):
         do_tip(update, context, _amounts_float, _recipients, _handled)
 
 
-def do_tip(update: Updater, context: CallbackContext, amounts_float, recipients, handled, verb="tip"):
+def do_tip(update, context, amounts_float, recipients, handled, verb="tip"):
     """
     Send amounts to recipients
     :param context:
@@ -509,7 +505,7 @@ def do_tip(update: Updater, context: CallbackContext, amounts_float, recipients,
                             text="*%s* %s\n%s\n\n[tx %s](%s)%s" % (
                                 update.effective_user.name,
                                 strings.get("%s_success" % verb, _lang),
-                                ''.join((("\n- `%3.0f %s ` %s *%s*" % (
+                                ''.join((("\n- `%.3f %s ` %s *%s*" % (
                                     _tip_dict_accounts[_recipient_id], __unit,
                                     strings.get("%s_preposition" % verb, _lang),
                                     handled[_recipient_id][0])) for _recipient_id in _tip_dict_accounts)),
@@ -523,7 +519,7 @@ def do_tip(update: Updater, context: CallbackContext, amounts_float, recipients,
                         )
 
 
-def damp_rock(update: Updater, context: CallbackContext):
+def damp_rock(update, context):
     """
     Manages a queue of active users.
     Activity type is checked before calling this function.
@@ -538,7 +534,6 @@ def damp_rock(update: Updater, context: CallbackContext):
         return
     elif update.effective_chat.type not in ["group", "supergroup"]:
         return
-    #
     _group_id = str(update.effective_chat.id)
     if update.effective_user.is_bot:
         return
@@ -580,7 +575,7 @@ def damp_rock(update: Updater, context: CallbackContext):
         # but real pruning would be better
 
 
-def rain(update: Updater, context: CallbackContext):
+def rain(update, context):
     if not can_use(update):
         return
     if update.effective_chat is None:
@@ -661,8 +656,7 @@ def rain(update: Updater, context: CallbackContext):
         do_tip([_rain_amount_demanded], _recipients, _handled, verb="rain")
 
 
-# Done: Revamp withdraw() function (2018-07-16)
-def withdraw(update: Updater, context: CallbackContext):
+def withdraw(update, context):
     """
     Withdraw to an address. Works only in private.
     """
@@ -726,7 +720,7 @@ def withdraw(update: Updater, context: CallbackContext):
                             )
 
 
-def scavenge(update: Updater, context: CallbackContext):
+def scavenge(update, context):
     if _paused:
         update.message.reply_text(text=emoji.emojize(strings.get("global_paused"), use_aliases=True), quote=True)
         return
@@ -787,7 +781,7 @@ def scavenge(update: Updater, context: CallbackContext):
                                         )
 
 
-def cmd_get_log(update: Updater, context: CallbackContext):
+def cmd_get_log(update, context):
     """
     Send logs to (admin) user
     """
@@ -807,13 +801,13 @@ def cmd_get_log(update: Updater, context: CallbackContext):
             message="Log sent to admin '%s'." % update.effective_user.name)
 
 
-def cmd_clear_log(update: Updater, context: CallbackContext):
+def cmd_clear_log(update, context):
     if update.effective_chat.id in config["admins"]:
         clear_log()
         update.message.reply_text(text=emoji.emojize(strings.get("clear_log_done"), use_aliases=True))
 
 
-def cmd_pause(update: Updater, context: CallbackContext):
+def cmd_pause(update, context):
     # Admins only
     if update.effective_chat.id in config["admins"]:
         global _paused
@@ -828,7 +822,7 @@ def cmd_pause(update: Updater, context: CallbackContext):
         _rain_queues.clear()
 
 
-def cmd_queue(update: Updater, context: CallbackContext):
+def cmd_queue(update, context):
     # Admins only
     if update.effective_user.id in config["admins"]:
         _chat_id = str(update.effective_chat.id)
