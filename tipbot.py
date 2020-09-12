@@ -7,7 +7,7 @@ import emoji
 
 from telegram import ParseMode, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CommandHandler, CallbackQueryHandler, MessageHandler
-from telegram.ext import Updater, CallbackContext, filters
+from telegram.ext import Updater, CallbackContext, Filters
 
 from HelperFunctions import *
 from rpc import CoinRPC, Wrapper as RPCWrapper
@@ -32,8 +32,8 @@ if _testnet:
     __wallet_rpc = RPCWrapper(CoinRPC(config["rpc-uri-test"], (config["rpc-user-test"], config["rpc-psw-test"])))
 else:
     __wallet_rpc = RPCWrapper(CoinRPC(config["rpc-uri"], (config["rpc-user"], config["rpc-psw"])))
-__rain_queue_filter = filters.Filters.group & (
-        filters.Filters.text | filters.Filters.photo | filters.Filters.video | filters.Filters.reply | filters.Filters.forwarded
+__rain_queue_filter = Filters.group & (
+        Filters.text | Filters.photo | Filters.video | Filters.reply | Filters.forwarded
 )
 __rain_queue_min_text_length = config["rain"]["rain_queue_min_text_length"]
 __rain_queue_min_words = config["rain"]["rain_queue_min_words"]
@@ -599,7 +599,7 @@ def rain(update, context):
         _rain_amount_demanded = 0
         _rain_members_demanded = __rain_queue_max_members  # number of members = min(optional args[1], queue_max, queue_len)
         try:
-            _rain_amount_demanded = int(context.args[0])
+            _rain_amount_demanded = float(context.args[0])
             if len(context.args) > 1:
                 _rain_members_demanded = int(context.args[1])
         except ValueError:
@@ -653,7 +653,7 @@ def rain(update, context):
                     break
         log("rain", _user_id,
             "rain (%i over %i members) handed to do_tip()" % (_rain_amount_demanded, len(_recipients)))
-        do_tip([_rain_amount_demanded], _recipients, _handled, verb="rain")
+        do_tip(update, context, [_rain_amount_demanded], _recipients, _handled, verb="rain")
 
 
 def withdraw(update, context):
