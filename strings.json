@@ -80,7 +80,7 @@
             "on"
         ],
         "rain_queue_min_amount": [
-            "Can't rain less than `%i %s` per member (demanded: `%i %s`)."
+            "Can't rain less than `%.3f %s` per member (demanded: `%.3f %s`)."
         ],
         "rain_queue_min_max_members": [
             "Can't rain on less than `%i` or more than `%i%` members (demanded: `%i`)."
