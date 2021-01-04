@@ -62,4 +62,14 @@ To achieve a properly integration, the `iocoin.conf` file need some arguments, e
     rpcallowip=127.0.0.1
     rpcconnect=127.0.0.1
 
+### Donations
+
+With each donation received, we become all that much closer to our goal.
+
+IOC address `iTVMSGJoPqwkpY4bH7ukxvknWrnCwWQkc4`
+
+BTC address `1BJpETZDrHWvruQQhzCtNDqAX6W5WutGG9`
+
+Thank you for making a difference through your compassion and generosity.
+
 ---
